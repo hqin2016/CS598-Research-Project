@@ -1,0 +1,6 @@
+rbac:
+  create: true
+controller:
+  replicaCount: 1
+  service:
+    loadBalancerIP: ${cluster_ip}
