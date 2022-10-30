@@ -46,3 +46,20 @@ Running at 1/12th timestep means that every data point is in 5 second intervals 
 `Average CPU Utilization`: 31%
 `Average Response Time`: 286ms
 `Average Replica Count`: 2.828
+
+### Custom HPA
+
+**Sequential with 80%/50% Utilization Scaling**
+`Average CPU Utilization`: 46%
+`Average Response Time`: 897ms
+`Average Replica Count`: 3.328
+
+**Diamond with 80%/50% Utilization Scaling**
+`Average CPU Utilization`: 27%
+`Average Response Time`: 478ms
+`Average Replica Count`: 2.108
+
+**Complex with 80%/50% Utilization Scaling**
+`Average CPU Utilization`: 32%
+`Average Response Time`: 411ms
+`Average Replica Count`: 2.216
