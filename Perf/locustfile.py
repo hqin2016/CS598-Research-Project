@@ -1,20 +1,23 @@
 import csv
 import logging
-from locust import HttpUser, task, LoadTestShape, between
+import random
+from locust import HttpUser, task, LoadTestShape, between, events
+
+logging.basicConfig(filename='run.txt', filemode='w', format='[%(asctime)s]%(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
 class HelloWorldUser(HttpUser):
-    wait_time = between(5, 10)
+    wait_time = between(0.5, 1.5)
     @task
     def hello_world(self):
-        with self.client.get("/hello", catch_response=True) as response:
-            if response.text != "Hello World!":
-                response.failure("Wrong response")
+        endpoint = "/service-a?n={}"
+        with self.client.get(endpoint.format(random.randint(0, 100)), name="/", catch_response=True) as response:
+            logging.info(f"caller:{response.elapsed}|{response.text}")
 
 class SimpleRampShape(LoadTestShape):
     end_step = 161
     spawn_rate = 100 #High enough to be instant spawn
-    second_conversion = 30 #How many seconds per step
-    scaling = 0.25 #How to scale the amplitude
+    second_conversion = 5 #How many seconds per step
+    scaling = 1 #How to scale the amplitude
 
     def __init__(self):
         with open('workload_base.csv', mode='r') as file:
