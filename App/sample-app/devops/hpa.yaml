@@ -1,12 +1,21 @@
-apiVersion: autoscaling/v1
+apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: sample-app-hpa
+  name: [SERVICE_NAME]-hpa
 spec:
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 5
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: sample-app-deployment
-  targetCPUUtilizationPercentage: 50
+    name: [SERVICE_NAME]-deployment
+  behavior:
+    scaleUp:
+      selectPolicy: Disabled
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80

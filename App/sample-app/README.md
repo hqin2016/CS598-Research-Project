@@ -37,4 +37,12 @@ Re-tag the docker image then push to Docker Hub
 
 ## REST Endpoints
 
-### GET /hello
+### GET / {n: number}
+Runs the factorial of 10,000 + n * 10
+Responds with OK
+
+### GET /health
+Responds with OK
+
+### GET /status
+Response with average response time of child service.

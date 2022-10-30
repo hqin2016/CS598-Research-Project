@@ -1,19 +1,26 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sample-app-ingress
+  name: [SERVICE_NAME]-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   ingressClassName: nginx
   rules:
-  - host: 35.223.4.82.nip.io
+  - host: [CLUSTER_IP].nip.io
     http:
       paths:
-      - path: /sample/(.*)
+      - path: /[SERVICE_NAME]
         pathType: Prefix
         backend:
           service:
-            name: sample-app-service
+            name: [SERVICE_NAME]-service
+            port:
+              number: 80
+      - path: /[SERVICE_NAME]/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: [SERVICE_NAME]-service
             port:
               number: 80
