@@ -11,5 +11,5 @@
 ## Run
 
 ```
-    java -jar target/application-controller-0.0.1-SNAPSHOT.jar
+    java -jar target/application-controller-0.0.1-SNAPSHOT.jar <optional argument of topology sequential|diamond|complex> --server.host=3000
 ```

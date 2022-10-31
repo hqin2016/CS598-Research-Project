@@ -12,7 +12,7 @@
     java -jar target/sample-app-0.0.1-SNAPSHOT.jar
 ```
 
-## Deployment
+## Deployment to GKE
 
 Split the jar file to improve performance with caching
 ```
@@ -21,7 +21,7 @@ Split the jar file to improve performance with caching
 
 Build the docker image as both a version and latest
 ```
-    docker build -t cs598ccc/sample-app:0.0.1 -t cs598ccc/sample-app:latest .
+    docker build -t cs598ccc/sample-app:0.0.1 .
 ```
 
 Testing the docker image locally
@@ -46,3 +46,11 @@ Responds with OK
 
 ### GET /status
 Response with average response time of child service.
+
+## Environment Variables
+
+The following environment variables are used to control aspects of the application:
+- FACTORIAL_BASE: instead of 10k + n * 10, it's FACTORIAL_BASE + n*10
+- SERVICE_TYPE: either LEAF or NODE, defaults to LEAF, leaf will not call dependencies while node will randomly choose one dependency to call
+- HOST_ENDPOINT: defaults to localhost:8080, this is used when in GKE to know how to talk to other services
+- DEPENDENCIES: defaults to health which when in local will call the service's own health endpoint
