@@ -15,14 +15,14 @@ pushd App &>/dev/null
     if command -v helm &>/dev/null
     then
         echo "[INFO] Helm found, will initialize using helm"
-        helm install --dry-run project -f "project/${topology}.yaml" project \
+        helm install project -f "project/${topology}.yaml" project \
             --set containerRegistry="$container_registry" \
             --set appVersion="$version" \
             --set controllerVersion="$version"
     elif command -v kubectl &>/dev/null
     then
         echo "[INFO] Kubectl found, will initialize using kubectl"
-        kubectl apply --dry-run -f "manifests/${topology}-manifest.yaml"
+        kubectl apply -f "manifests/${topology}-manifest.yaml"
     else
         echo "[ERROR] No compatible commands found, exiting..."
         exit
