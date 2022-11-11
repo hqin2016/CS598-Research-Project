@@ -10,7 +10,20 @@ This is the repository containing the load testing portion of this project
 
 ## Run
 
-Start load testing UI 
+### Sample
+
+Run the following script to start a simple perf program that allows manual adjustment of user count, spawn rate, and test duration.
+
 ```
-    locust
+    ./scripts/sample.sh
+```
+
+### Workload
+
+Run the following script to start the real world workload. The projected run time is 160 minutes.
+
+_If there is a need to test with a shorter time frame, modify second_conversion inside locustfile.py (i.e. 10 = 1/6 the time)_
+
+```
+    ./scripts/load.sh
 ```

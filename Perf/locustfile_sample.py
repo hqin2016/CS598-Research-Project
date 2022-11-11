@@ -7,5 +7,5 @@ class HelloWorldUser(HttpUser):
     wait_time = between(1, 2)
     @task
     def hello_world(self):
-        endpoint = "/service-a?n={}"
+        endpoint = "/?n={}"
         self.client.get(endpoint.format(random.randint(0, 100)), name="/")

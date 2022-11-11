@@ -1,0 +1,1257 @@
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: controller
+---
+# Source: project/templates/monitor-manifest.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+# Source: project/templates/monitor-manifest.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-server-conf
+  labels:
+    name: prometheus-server-conf
+  namespace: monitoring
+data:
+  prometheus.yml: |-
+    global:
+      scrape_interval: 5s
+      evaluation_interval: 5s
+    rule_files:
+      - /etc/prometheus/prometheus.rules
+    alerting:
+      alertmanagers:
+      - scheme: http
+        static_configs:
+        - targets:
+          - "alertmanager.monitoring.svc:9093"
+
+    scrape_configs:
+      - job_name: 'kubernetes-service-endpoints'
+
+        kubernetes_sd_configs:
+        - role: endpoints
+
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          action: replace
+          target_label: __scheme__
+          regex: (https?)
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          action: replace
+          target_label: __address__
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+        - action: labelmap
+          regex: __meta_kubernetes_service_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          action: replace
+          target_label: kubernetes_name
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: controller
+---
+# Source: project/templates/monitor-manifest.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: monitoring
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-a
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8080"
+spec:
+  type: ClusterIP
+  selector:
+    app: service-a
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-b
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8080"
+spec:
+  type: ClusterIP
+  selector:
+    app: service-b
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-c
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8080"
+spec:
+  type: ClusterIP
+  selector:
+    app: service-c
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-d
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8080"
+spec:
+  type: ClusterIP
+  selector:
+    app: service-d
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-e
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8080"
+spec:
+  type: ClusterIP
+  selector:
+    app: service-e
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-f
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8080"
+spec:
+  type: ClusterIP
+  selector:
+    app: service-f
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-g
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8080"
+spec:
+  type: ClusterIP
+  selector:
+    app: service-g
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: application-external
+spec:
+  type: LoadBalancer
+  selector:
+    app: service-a
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: application-controller
+  namespace: controller
+spec:
+  type: ClusterIP
+  selector:
+    app: application-controller
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-a-controller
+  namespace: controller
+spec:
+  type: ClusterIP
+  selector:
+    app: service-a-controller
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-b-controller
+  namespace: controller
+spec:
+  type: ClusterIP
+  selector:
+    app: service-b-controller
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-c-controller
+  namespace: controller
+spec:
+  type: ClusterIP
+  selector:
+    app: service-c-controller
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-d-controller
+  namespace: controller
+spec:
+  type: ClusterIP
+  selector:
+    app: service-d-controller
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-e-controller
+  namespace: controller
+spec:
+  type: ClusterIP
+  selector:
+    app: service-e-controller
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-f-controller
+  namespace: controller
+spec:
+  type: ClusterIP
+  selector:
+    app: service-f-controller
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-g-controller
+  namespace: controller
+spec:
+  type: ClusterIP
+  selector:
+    app: service-g-controller
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# Source: project/templates/monitor-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-internal
+  namespace: monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app: prometheus-server
+  ports:
+    - port: 80 
+      targetPort: 9090
+---
+# Source: project/templates/monitor-manifest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-external
+  namespace: monitoring
+spec:
+  type: LoadBalancer
+  selector:
+    app: prometheus-server
+  ports:
+  - name: http
+    port: 80
+    targetPort: 9090
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-a
+spec:
+  selector:
+    matchLabels:
+      app: service-a
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-a
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/sample-app:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+            - name: FACTORIAL_BASE
+              value: "100"
+            - name: SERVICE_TYPE
+              value: "NODE"
+            
+            - name: DEPENDENCIES
+              value: "service-b service-c service-d service-e service-f"
+            
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-b
+spec:
+  selector:
+    matchLabels:
+      app: service-b
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-b
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/sample-app:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+            - name: FACTORIAL_BASE
+              value: "100"
+            - name: SERVICE_TYPE
+              value: "NODE"
+            
+            - name: DEPENDENCIES
+              value: "service-g"
+            
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-c
+spec:
+  selector:
+    matchLabels:
+      app: service-c
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-c
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/sample-app:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+            - name: FACTORIAL_BASE
+              value: "100"
+            - name: SERVICE_TYPE
+              value: "NODE"
+            
+            - name: DEPENDENCIES
+              value: "service-g"
+            
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-d
+spec:
+  selector:
+    matchLabels:
+      app: service-d
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-d
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/sample-app:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+            - name: FACTORIAL_BASE
+              value: "100"
+            - name: SERVICE_TYPE
+              value: "NODE"
+            
+            - name: DEPENDENCIES
+              value: "service-g"
+            
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-e
+spec:
+  selector:
+    matchLabels:
+      app: service-e
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-e
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/sample-app:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+            - name: FACTORIAL_BASE
+              value: "100"
+            - name: SERVICE_TYPE
+              value: "NODE"
+            
+            - name: DEPENDENCIES
+              value: "service-g"
+            
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-f
+spec:
+  selector:
+    matchLabels:
+      app: service-f
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-f
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/sample-app:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+            - name: FACTORIAL_BASE
+              value: "100"
+            - name: SERVICE_TYPE
+              value: "NODE"
+            
+            - name: DEPENDENCIES
+              value: "service-g"
+            
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-g
+spec:
+  selector:
+    matchLabels:
+      app: service-g
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-g
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/sample-app:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+            - name: FACTORIAL_BASE
+              value: "100"
+            - name: SERVICE_TYPE
+              value: "LEAF"
+            
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application-controller
+  namespace: controller
+spec:
+  selector:
+    matchLabels:
+      app: application-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: application-controller
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/application-controller:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+          
+            - name: MONITOR_ADDR
+              value: "prometheus-internal.monitoring"
+            - name: TOPOLOGY
+              value: "diamond"
+          
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/controller-manifest.yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-a-controller
+  namespace: controller
+spec:
+  selector:
+    matchLabels:
+      app: service-a-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-a-controller
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/microservice-controller:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+          
+            - name: SERVICE_NAME
+              value: service-a
+          
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-b-controller
+  namespace: controller
+spec:
+  selector:
+    matchLabels:
+      app: service-b-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-b-controller
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/microservice-controller:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+          
+            - name: SERVICE_NAME
+              value: service-b
+          
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-c-controller
+  namespace: controller
+spec:
+  selector:
+    matchLabels:
+      app: service-c-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-c-controller
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/microservice-controller:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+          
+            - name: SERVICE_NAME
+              value: service-c
+          
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-d-controller
+  namespace: controller
+spec:
+  selector:
+    matchLabels:
+      app: service-d-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-d-controller
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/microservice-controller:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+          
+            - name: SERVICE_NAME
+              value: service-d
+          
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-e-controller
+  namespace: controller
+spec:
+  selector:
+    matchLabels:
+      app: service-e-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-e-controller
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/microservice-controller:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+          
+            - name: SERVICE_NAME
+              value: service-e
+          
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-f-controller
+  namespace: controller
+spec:
+  selector:
+    matchLabels:
+      app: service-f-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-f-controller
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/microservice-controller:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+          
+            - name: SERVICE_NAME
+              value: service-f
+          
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/controller-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-g-controller
+  namespace: controller
+spec:
+  selector:
+    matchLabels:
+      app: service-g-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: service-g-controller
+    spec:
+      containers:
+        - name: server
+          image: danielbaiuiuc/microservice-controller:0.1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+          
+            - name: SERVICE_NAME
+              value: service-g
+          
+          livenessProbe:
+            initialDelaySeconds: 20
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 8080
+              path: /health
+---
+# Source: project/templates/monitor-manifest.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-deployment
+  namespace: monitoring
+  labels:
+    app: prometheus-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-server
+  template:
+    metadata:
+      labels:
+        app: prometheus-server
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus
+          args:
+            - "--storage.tsdb.retention.time=12h"
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus/"
+          ports:
+            - containerPort: 9090
+          resources:
+            requests:
+              cpu: 500m
+              memory: 500M
+            limits:
+              cpu: 1
+              memory: 1Gi
+          volumeMounts:
+            - name: prometheus-config-volume
+              mountPath: /etc/prometheus/
+            - name: prometheus-storage-volume
+              mountPath: /prometheus/
+      volumes:
+        - name: prometheus-config-volume
+          configMap:
+            defaultMode: 420
+            name: prometheus-server-conf
+        - name: prometheus-storage-volume
+          emptyDir: {}
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: service-a
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: service-a
+  behavior:
+    scaleUp:
+      selectPolicy: Disabled
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: service-b
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: service-b
+  behavior:
+    scaleUp:
+      selectPolicy: Disabled
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: service-c
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: service-c
+  behavior:
+    scaleUp:
+      selectPolicy: Disabled
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: service-d
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: service-d
+  behavior:
+    scaleUp:
+      selectPolicy: Disabled
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: service-e
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: service-e
+  behavior:
+    scaleUp:
+      selectPolicy: Disabled
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: service-f
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: service-f
+  behavior:
+    scaleUp:
+      selectPolicy: Disabled
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+---
+# Source: project/templates/app-manifest.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: service-g
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: service-g
+  behavior:
+    scaleUp:
+      selectPolicy: Disabled
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60

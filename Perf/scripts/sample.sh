@@ -3,5 +3,5 @@
 cluster_ip=$(kubectl get service application-external --output jsonpath='{.status.loadBalancer.ingress[0].ip}' | tr -d '"')
 host="http://${cluster_ip}.nip.io"
 
-echo "Starting load test on port 8090"
-locust --skip-log-setup --web-port 8091 --host $host
+echo "Starting warmup on port 8090"
+locust -f locustfile_sample.py --web-port 8090 --host $host

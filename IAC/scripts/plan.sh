@@ -1,10 +1,10 @@
 #!/bin/bash -e
 
+bucket=${bucket:?}
+
 [[ -n "$DEBUG_SCRIPT" ]] && set -x
 
-git_branch=$(git branch --show-current)
-
-terraform -chdir=terraform init -backend-config="prefix=terraform/${git_branch}"
+terraform -chdir=terraform init -backend-config="bucket=${bucket}" 
 
 flags=""
 if [[ -n "$PLAN_DESTROY" ]]; then
