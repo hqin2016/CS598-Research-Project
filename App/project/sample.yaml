@@ -1,0 +1,27 @@
+appVersion: "0.1.0"
+controllerVersion: "0.1.0"
+
+# Update this to change where to fetch container images
+# i.e gcr.io/<project-id>
+containerRegistry: "danielbaiuiuc"
+
+topology: sample
+
+minReplicas: 1
+maxReplicas: 1
+scaleUpThreshold: 80
+
+services:
+  - name: service-a
+    type: node
+    factorial_base: 1000
+    dependencies: service-b service-c
+  - name: service-b
+    type: leaf
+    factorial_base: 2000
+  - name: service-c
+    type: leaf
+    factorial_base: 3000
+
+# Enabling this will create external loadbalancers for controllers
+enableDebug: true

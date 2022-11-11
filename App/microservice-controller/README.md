@@ -13,5 +13,5 @@ Need to have a service account created through IAM console. Update _GOOGLE\_APPL
 ## Run
 
 ```
-    java -jar target/microservice-controller-0.0.1-SNAPSHOT.jar <service name such as service-a|service-b|..> --server.port=3001
+    java -jar target/microservice-controller-0.0.1-SNAPSHOT.jar
 ```

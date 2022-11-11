@@ -1,13 +1,13 @@
 data "google_client_config" "default" {}
 
-resource "google_compute_address" "default" {
-  name   = "gca-centralus-001"
-  region = "us-central1"
-}
+# resource "google_compute_address" "default" {
+#   name   = "gca-centralus-1"
+#   region = "us-central1"
+# }
 
 # ~9min creation time, ~3min destroy time
 resource "google_container_cluster" "default" {
-  name     = "gke-cluster-centralus-001"
+  name     = "gke-cluster-centralus-1"
   location = "us-central1-a"
 
   # We can't create a cluster with no node pool defined, but we want to only use
@@ -24,14 +24,14 @@ resource "google_container_cluster" "default" {
 
 # ~2min creation time, ~4min destroy time
 resource "google_container_node_pool" "default" {
-  name       = "gke-node-pool-centralus-001"
+  name       = "gke-node-pool-centralus-1"
   location   = "us-central1-a"
   cluster    = google_container_cluster.default.name
-  node_count = 1
+  node_count = 5
 
   node_config {
     preemptible  = true
-    machine_type = "e2-medium" # 2 vCPUs, 4 GB Memory, $0.092 hourly
+    machine_type = "n1-standard-2" # 2 vCPUs, 7.5 GB Memory, $0.092 hourly
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     service_account = google_service_account.gke_node_pool_service_account.email
@@ -41,12 +41,12 @@ resource "google_container_node_pool" "default" {
   }
 }
 
-resource "helm_release" "ingress_nginx" {
-  name       = "ingress-nginx"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  version    = "4.3.0"
-  wait       = false
+# resource "helm_release" "ingress_nginx" {
+#   name       = "ingress-nginx"
+#   repository = "https://kubernetes.github.io/ingress-nginx"
+#   chart      = "ingress-nginx"
+#   version    = "4.3.0"
+#   wait       = false
 
-  values = [templatefile("./ingress.yaml", { cluster_ip = google_compute_address.default.address })]
-}
+#   values = [templatefile("./ingress.yaml", { cluster_ip = google_compute_address.default.address })]
+# }

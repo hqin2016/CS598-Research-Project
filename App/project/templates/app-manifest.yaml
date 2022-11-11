@@ -1,0 +1,19 @@
+{{- $root := . -}}
+{{/* Deploy applications */}}
+{{ range $service := .Values.services }}
+---
+{{ template "application" (merge $service $root) }}
+{{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: application-external
+spec:
+  type: LoadBalancer
+  selector:
+    app: service-a
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
