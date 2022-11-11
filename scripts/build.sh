@@ -26,6 +26,7 @@ fi
 pushd IAC &>/dev/null
     bucket=$(unique=$unique_string ./scripts/setup_iac.sh)
     bucket=$bucket ./scripts/apply.sh
+    gcloud container clusters get-credentials gke-cluster-centralus-1 --region us-central1-a
 popd &>/dev/null
 
 pushd App &>/dev/null
